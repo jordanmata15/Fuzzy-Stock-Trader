@@ -80,8 +80,8 @@ classdef StockTrader < handle
         %TRADE Executes a trade action based on the crisp value from the
         %fuzzy system output (actionValue between [0,1])
             
-            fewPercent = 0.20;    
-            manyPercent = 0.40;
+            fewPercent = 0.5;    
+            manyPercent = 1;
 
             if actionValue < 0.20
                 % SM
