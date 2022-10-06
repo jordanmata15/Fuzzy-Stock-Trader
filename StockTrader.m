@@ -1,6 +1,13 @@
 classdef StockTrader < handle
-    %STOCKTRADER Summary of this class goes here
-    %   Detailed explanation goes here
+    %STOCKTRADER Fuzzy system to simulate a stock trader
+    % 
+    % The stock price on day 'i' is given by the static method XYZ(i)
+    % The moving average divergence on day 'i' is given by MAD(i)
+    % The 10 day moving average on day 'i' is given by TMA(i, 10)
+    % We assume there is a correlation between MAD(i) and XYZ(i+1)
+    % such that if MAD(i) is positive, XYZ(i+1) will generally increase
+    % and if MAD(i) is negative, XYZ(i+1) will generally decrease.
+    % Otherwise, there is no change.
     
     properties
         currentBalance;
@@ -12,7 +19,6 @@ classdef StockTrader < handle
         
         function obj = StockTrader(funding, fuzzySystemFile)
             %STOCKTRADER Construct an instance of this class
-            %   Detailed explanation goes here
             obj.currentBalance = funding;
             obj.stocksHeld = 0;
             obj.fuzzySystem = readfis(fuzzySystemFile);
@@ -21,6 +27,7 @@ classdef StockTrader < handle
 
 
         function [endingValue] = RunTradeSimulation(obj)
+            %RUNTRADESIMULATION Runs the simulation over 100 days
             
             nDayAverage = 10;
             xyzMin = inf;
@@ -59,11 +66,12 @@ classdef StockTrader < handle
                     actionCrispValue = evalfis(obj.fuzzySystem, ...
                                                [mad, xyz, tma]);
                     obj.Trade(actionCrispValue, xyz);
-                    fprintf("%0.2f\n", obj.currentBalance);
+                    fprintf("%0.2f\n", obj.currentBalance + xyz*obj.stocksHeld);
                 end
             end
 
-            endingValue = obj.currentBalance;
+            stockValue = xyz*obj.stocksHeld;
+            endingValue = obj.currentBalance + stockValue;
         end
 
 
@@ -83,6 +91,7 @@ classdef StockTrader < handle
                     obj.currentBalance = obj.currentBalance ...
                                             + (unitsToSell * xyz);
                 end
+
             elseif actionValue < 0.40
                 % SF
                 if obj.stocksHeld > 0
@@ -91,9 +100,11 @@ classdef StockTrader < handle
                     obj.currentBalance = obj.currentBalance ...
                                             + (unitsToSell * xyz);
                 end
+            
             elseif actionValue < 0.60
                 % DT
                 % do nothing
+            
             elseif actionValue < 0.80
                 % BF
                 if obj.currentBalance > 0
@@ -102,6 +113,7 @@ classdef StockTrader < handle
                     obj.currentBalance = obj.currentBalance ...
                                             - (unitsToBuy * xyz);
                 end
+            
             else
                 % BM
                 if obj.currentBalance > 0
@@ -111,9 +123,6 @@ classdef StockTrader < handle
                                             - (unitsToBuy * xyz);
                 end
             end
-        end
-
-        function PrintActionSummary()
         end
 
     end
