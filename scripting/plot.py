@@ -5,12 +5,13 @@ Script for plotting the daily data of the fuzzy stock trading system.
 @Date: October 6, 2022
 """
 
+from cycler import cycler
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
+from sklearn.metrics import jaccard_score
 
 PACKAGE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
-SCRIPTING_DIR = os.path.join(PACKAGE_DIR, "scripts")
 DATA_DIR = os.path.join(PACKAGE_DIR, "data")
 DATA_FILE = os.path.join(DATA_DIR, "data.csv")
 
@@ -46,8 +47,9 @@ def plot_balances_and_net_worth(df):
     balance_stocks_df.plot.bar(stacked=True, 
                                 color=[COLOR_DICT.get(x, '#333333') for x in balance_stocks_df.columns], 
                                 width=1, 
-                                ax=ax)  
-    plt.setp(ax.get_xticklabels()[::2], visible=False)
+                                ax=ax)
+    plt.locator_params(nbins=4)
+    plt.locator_params(axis='x', nbins=20)
     plt.xlabel("Day")
     plt.ylabel("Dollar Value")
     plt.grid(linewidth=0.3)
@@ -55,19 +57,27 @@ def plot_balances_and_net_worth(df):
 
 
 
-def plot_normalized_lines(df):
-    """Plot a subset of the numeric columns. Each will be normalized so trends can be analyzed
-    between multiple columns. 
+def plot_normalized_lines_subplots(df_list):
+    """Plot a list of dataframes as normalized line plots. Each dataframe is a separate plot. To plot
+    all lines on the same chart, pass in a single dataframe with all desired columns.
 
-    :param: df - dataframe containing a subset of the columns to plot. There should be one 
+    :param: df - list of dataframes, each containing the columns to plot. There should be one 
                     record for each day.
     """
-    normalized_df = (df-df.min())/(df.max()-df.min())
-    normalized_df.plot(color=[COLOR_DICT.get(x, '#333333') for x in df.columns])
-
-    plt.xlabel("Day")
-    plt.ylabel("Value (normalized to [0,1])")
-    plt.grid(linewidth=0.3)
+    df_size = len(df_list)
+    fig, ax = plt.subplots(df_size)
+    fig.tight_layout()
+    for i, df in enumerate(df_list):
+        normalized_df = (df-df.min())/(df.max()-df.min())
+        ax[i].set_prop_cycle(cycler(color=[COLOR_DICT.get(x, '#333333') for x in df.columns]))
+        ax[i].plot(normalized_df)
+        ax[i].locator_params(nbins=4)
+        ax[i].locator_params(axis='x', nbins=20)
+        ax[i].locator_params(axis='y', nbins=10)
+        ax[i].set_xlabel("Day")
+        ax[i].set_ylabel("Value (normalized to [0,1])")
+        ax[i].grid(linewidth=0.3)
+        ax[i].legend([col for col in df.columns.tolist()], loc="upper left")
     plt.show()
 
 
@@ -79,6 +89,7 @@ if __name__=='__main__':
     results_df.index = results_df.index+10
     
     plot_balances_and_net_worth(results_df)
-    plot_normalized_lines(results_df[['TMA', 'XYZ_Price']])
-    plot_normalized_lines(results_df[['Stocks_Held', 'TMA']])
-    plot_normalized_lines(results_df[['MAD', 'XYZ_Price']])
+    plot_normalized_lines_subplots([results_df[['XYZ_Price']],
+                                        results_df[['TMA']],
+                                        results_df[['MAD']],
+                                        results_df[['Stocks_Held']],])
