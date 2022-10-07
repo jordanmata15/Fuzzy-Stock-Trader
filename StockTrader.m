@@ -43,30 +43,33 @@ classdef StockTrader < handle
                 mad = StockTrader.MAD(i);
                 madMin = min(madMin, mad);
                 madMax = max(madMax, mad);
-                mad = StockTrader.Normalize(mad, madMin, madMax);
+                madNormalized = StockTrader.Normalize(mad, madMin, madMax);
             
                 % calculate XYZ and then normalize it between 0-1 
                 % (based on what we've seen so far)
                 xyz = StockTrader.XYZ(i);
                 xyzMin = min(xyzMin, xyz);
                 xyzMax = max(xyzMax, xyz);
-                xyz = StockTrader.Normalize(xyz, xyzMin, xyzMax);
+                xyzNormalized = StockTrader.Normalize(xyz, xyzMin, xyzMax);
             
                 % calculate TMA and then normalize it between 0-1 
                 % (based on what we've seen so far)
                 tma = StockTrader.TMA(i, nDayAverage);
                 tmaMin = min(tmaMin, tma);
                 tmaMax = max(tmaMax, tma);
-                tma = StockTrader.Normalize(tma, tmaMin, tmaMax);
+                tmaNormalized = StockTrader.Normalize(tma, tmaMin, tmaMax);
                 
                 % do not trade until we have a full set to average
                 if i < nDayAverage
                     continue
                 else
                     actionCrispValue = evalfis(obj.fuzzySystem, ...
-                                               [mad, xyz, tma]);
-                    obj.Trade(actionCrispValue, xyz);
-                    fprintf("%0.2f\n", obj.currentBalance + xyz*obj.stocksHeld);
+                                               [madNormalized, ...
+                                                   xyzNormalized, ...
+                                                   tmaNormalized]);
+                    actionSummary = obj.Trade(actionCrispValue, xyz);
+                    actionSummary.print();
+                    %fprintf("%0.2f\n", obj.currentBalance + xyz*obj.stocksHeld);
                 end
             end
 
@@ -76,55 +79,54 @@ classdef StockTrader < handle
 
 
 
-        function Trade(obj, actionValue, xyz)
+        function [actionSummary] = Trade(obj, actionValue, xyz)
         %TRADE Executes a trade action based on the crisp value from the
         %fuzzy system output (actionValue between [0,1])
             
-            fewPercent = 0.5;    
-            manyPercent = 1;
+            fewPercent = 0.2;    
+            manyPercent = 0.4;
 
-            if actionValue < 0.20
-                % SM
-                if obj.stocksHeld > 0
-                    unitsToSell = obj.stocksHeld * manyPercent;
-                    obj.stocksHeld = obj.stocksHeld - unitsToSell;
-                    obj.currentBalance = obj.currentBalance ...
-                                            + (unitsToSell * xyz);
-                end
+            actionTaken = "DT";
+            unitsToTrade = 0;
 
-            elseif actionValue < 0.40
-                % SF
-                if obj.stocksHeld > 0
-                    unitsToSell = obj.stocksHeld * fewPercent;
-                    obj.stocksHeld = obj.stocksHeld - unitsToSell;
+            if (actionValue < 0.20) && (obj.stocksHeld > 0)
+                    actionTaken = "SM";
+                    unitsToTrade = obj.stocksHeld * manyPercent;
+                    obj.stocksHeld = obj.stocksHeld - unitsToTrade;
                     obj.currentBalance = obj.currentBalance ...
-                                            + (unitsToSell * xyz);
-                end
-            
-            elseif actionValue < 0.60
-                % DT
-                % do nothing
-            
-            elseif actionValue < 0.80
-                % BF
-                if obj.currentBalance > 0
-                    unitsToBuy = obj.currentBalance * fewPercent;
-                    obj.stocksHeld = obj.stocksHeld + unitsToBuy;
+                                            + (unitsToTrade * xyz);
+
+            elseif (actionValue < 0.40) && (obj.stocksHeld > 0)
+                    actionTaken = "SF";
+                    unitsToTrade = obj.stocksHeld * fewPercent;
+                    obj.stocksHeld = obj.stocksHeld - unitsToTrade;
                     obj.currentBalance = obj.currentBalance ...
-                                            - (unitsToBuy * xyz);
-                end
+                                            + (unitsToTrade * xyz);
             
-            else
-                % BM
-                if obj.currentBalance > 0
-                    unitsToBuy = obj.currentBalance * manyPercent;
-                    obj.stocksHeld = obj.stocksHeld + unitsToBuy;
+            elseif (actionValue < 0.60)
+                % DT - do nothing
+            
+            elseif (actionValue < 0.80) && (obj.currentBalance > 0)
+                    actionTaken = "BF";
+                    fundsForPurchasing = obj.currentBalance * fewPercent;
+                    unitsToTrade = fundsForPurchasing/xyz;
+                    obj.stocksHeld = obj.stocksHeld + unitsToTrade;
                     obj.currentBalance = obj.currentBalance ...
-                                            - (unitsToBuy * xyz);
-                end
+                                            - (unitsToTrade * xyz);
+
+            elseif (obj.currentBalance > 0)
+                    actionTaken = "BM";
+                    fundsForPurchasing = obj.currentBalance * manyPercent;
+                    unitsToTrade = fundsForPurchasing/xyz;
+                    obj.stocksHeld = obj.stocksHeld + unitsToTrade;
+                    obj.currentBalance = obj.currentBalance ...
+                                            - (unitsToTrade * xyz);
             end
-        end
 
+            actionSummary = Action(actionTaken, actionValue, xyz, ...
+                                    unitsToTrade, obj.currentBalance, ...
+                                    obj.stocksHeld);
+        end
     end
 
   
