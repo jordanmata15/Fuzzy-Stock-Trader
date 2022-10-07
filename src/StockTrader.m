@@ -59,7 +59,8 @@ classdef StockTrader < handle
                 tmaMax = max(tmaMax, tma);
                 tmaNormalized = StockTrader.Normalize(tma, tmaMin, tmaMax);
                 
-                % do not trade until we have a full set to average
+                % do not trade until we have a full set of n days to
+                % average
                 if i < nDayAverage
                     continue
                 else
@@ -81,9 +82,10 @@ classdef StockTrader < handle
 
         function [actionSummary] = Trade(obj, actionValue, xyz, mad, tma)
         %TRADE Executes a trade action based on the crisp value from the
-        %Object containing a summary of the action taken
+        %output of the fuzzy system.
+        %Returns an object containing a summary of the action taken
             
-            fewPercent = 0.3;    
+            fewPercent = 0.3;
             manyPercent = 0.7;
 
             actionTaken = "DT";
