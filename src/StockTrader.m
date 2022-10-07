@@ -67,9 +67,9 @@ classdef StockTrader < handle
                                                [madNormalized, ...
                                                    xyzNormalized, ...
                                                    tmaNormalized]);
-                    actionSummary = obj.Trade(actionCrispValue, xyz);
+                    actionSummary = obj.Trade(actionCrispValue, xyz, ...
+                                                mad, tma);
                     actionSummary.print();
-                    %fprintf("%0.2f\n", obj.currentBalance + xyz*obj.stocksHeld);
                 end
             end
 
@@ -79,12 +79,12 @@ classdef StockTrader < handle
 
 
 
-        function [actionSummary] = Trade(obj, actionValue, xyz)
+        function [actionSummary] = Trade(obj, actionValue, xyz, mad, tma)
         %TRADE Executes a trade action based on the crisp value from the
-        %fuzzy system output (actionValue between [0,1])
+        %Object containing a summary of the action taken
             
-            fewPercent = 0.2;    
-            manyPercent = 0.4;
+            fewPercent = 0.3;    
+            manyPercent = 0.7;
 
             actionTaken = "DT";
             unitsToTrade = 0;
@@ -123,7 +123,7 @@ classdef StockTrader < handle
                                             - (unitsToTrade * xyz);
             end
 
-            actionSummary = Action(actionTaken, actionValue, xyz, ...
+            actionSummary = Action(xyz, mad, tma, actionTaken, actionValue, ...
                                     unitsToTrade, obj.currentBalance, ...
                                     obj.stocksHeld);
         end
