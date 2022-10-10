@@ -37,7 +37,7 @@ classdef StockTrader < handle
             tmaMin = inf;
             tmaMax = -inf;
             
-            for i = 1:100
+            for i = 1:360
                 % calculate MAD and then normalize it between 0-1 
                 % (based on what we've seen so far)
                 mad = StockTrader.MAD(i);
@@ -85,8 +85,8 @@ classdef StockTrader < handle
         %output of the fuzzy system.
         %Returns an object containing a summary of the action taken
             
-            fewPercent = 0.5;
-            manyPercent = 1;
+            fewPercent = 0.4;
+            manyPercent = 1.0;
 
             actionTaken = "DT";
             unitsToTrade = 0;
