@@ -85,8 +85,8 @@ classdef StockTrader < handle
         %output of the fuzzy system.
         %Returns an object containing a summary of the action taken
             
-            fewPercent = 0.4;
-            manyPercent = 1.0;
+            fewPercent = 0.5;
+            manyPercent = 1;
 
             actionTaken = "DT";
             unitsToTrade = 0;
