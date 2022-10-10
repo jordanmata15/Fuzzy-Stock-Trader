@@ -39,7 +39,8 @@ def plot_balances_and_net_worth(df):
     net_worth_df.index = net_worth_df.index-10 
     balance_stocks_df = df[['Current_Balance', 'Stocks_Held_Value']]
 
-    _, ax = plt.subplots()
+    fig, ax = plt.subplots()
+    fig.set_size_inches(15, 10)
     net_worth_df.plot(linestyle='dashed',
                         linewidth=2,
                         color=[COLOR_DICT.get(x, '#333333') for x in net_worth_df.columns], 
@@ -68,6 +69,7 @@ def plot_normalized_lines_subplots(df_list):
     df_size = len(df_list)
     fig, ax = plt.subplots(df_size)
     fig.tight_layout()
+    fig.set_size_inches(15, 10)
     for i, df in enumerate(df_list):
         #title=" vs ".join(df.columns.tolist())
         ax[i].set_title("Figure " + str(i+1), color='red', fontweight='bold')
