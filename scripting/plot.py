@@ -52,6 +52,7 @@ def plot_balances_and_net_worth(df):
     plt.locator_params(axis='x', nbins=20)
     plt.xlabel("Day")
     plt.ylabel("Dollar Value")
+    plt.title("Figure A", color='red', fontweight='bold')
     plt.grid(linewidth=0.3)
     plt.show()
 
@@ -68,6 +69,8 @@ def plot_normalized_lines_subplots(df_list):
     fig, ax = plt.subplots(df_size)
     fig.tight_layout()
     for i, df in enumerate(df_list):
+        #title=" vs ".join(df.columns.tolist())
+        ax[i].set_title("Figure " + str(i+1), color='red', fontweight='bold')
         normalized_df = (df-df.min())/(df.max()-df.min())
         ax[i].set_prop_cycle(cycler(color=[COLOR_DICT.get(x, '#333333') for x in df.columns]))
         ax[i].plot(normalized_df)
