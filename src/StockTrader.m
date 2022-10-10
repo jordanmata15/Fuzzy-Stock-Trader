@@ -94,6 +94,7 @@ classdef StockTrader < handle
             if (actionValue < 0.20) && (obj.stocksHeld > 0)
                     actionTaken = "SM";
                     unitsToTrade = obj.stocksHeld * manyPercent;
+                    unitsToTrade = min(unitsToTrade, 600);
                     obj.stocksHeld = obj.stocksHeld - unitsToTrade;
                     obj.currentBalance = obj.currentBalance ...
                                             + (unitsToTrade * xyz);
@@ -101,6 +102,7 @@ classdef StockTrader < handle
             elseif (actionValue < 0.40) && (obj.stocksHeld > 0)
                     actionTaken = "SF";
                     unitsToTrade = obj.stocksHeld * fewPercent;
+                    unitsToTrade = min(unitsToTrade, 600);
                     obj.stocksHeld = obj.stocksHeld - unitsToTrade;
                     obj.currentBalance = obj.currentBalance ...
                                             + (unitsToTrade * xyz);
@@ -112,6 +114,7 @@ classdef StockTrader < handle
                     actionTaken = "BF";
                     fundsForPurchasing = obj.currentBalance * fewPercent;
                     unitsToTrade = fundsForPurchasing/xyz;
+                    unitsToTrade = min(unitsToTrade, 600);
                     obj.stocksHeld = obj.stocksHeld + unitsToTrade;
                     obj.currentBalance = obj.currentBalance ...
                                             - (unitsToTrade * xyz);
@@ -120,6 +123,7 @@ classdef StockTrader < handle
                     actionTaken = "BM";
                     fundsForPurchasing = obj.currentBalance * manyPercent;
                     unitsToTrade = fundsForPurchasing/xyz;
+                    unitsToTrade = min(unitsToTrade, 600);
                     obj.stocksHeld = obj.stocksHeld + unitsToTrade;
                     obj.currentBalance = obj.currentBalance ...
                                             - (unitsToTrade * xyz);
