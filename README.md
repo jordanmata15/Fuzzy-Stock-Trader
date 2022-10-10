@@ -14,8 +14,7 @@ There is a general correlation in MAD such that if MAD(i) is positive, then the 
 Both XYZ and MAD depend on a random integer based on the day. Therefore, they are both seeded with the day to make sure they have the same random value.
 
 # Usage
-In matlab:
-1. open the ./src folder as the project
+1. open the ./src folder as the project in matlab
 2. type `main` into the command window
 3. view output
 4. (Optional) copy the output to data/data.csv
