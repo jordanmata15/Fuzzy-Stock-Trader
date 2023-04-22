@@ -6,7 +6,7 @@ The program is designed to run a simulation of a stock trader over 360 days. The
 The inputs to the fuzzy system are:
 - TMA(i) - ten day moving average on day i
 - MAD(i) - mean average divergence on day i
-- XYZ(i) - price of stock XYZ on day i
+- XYZ(i) - price of stock XYZ on day i (a simulated value based on a partially random function. See `StockTrader.m`).
 
 There is a general correlation in MAD such that if MAD(i) is positive, then the XYZ(i+1) > XYZ(i). If MAD(i) is negative, then XYZ(i+1) < XYZ(i). Otherwise, there is no likely change.  This doesn't necessarily always hold.
 
